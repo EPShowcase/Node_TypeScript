@@ -1,15 +1,20 @@
+import {AuthenticationComponent} from '@loopback/authentication';
+import {
+  JWTAuthenticationComponent,
+  UserServiceBindings,
+} from '@loopback/authentication-jwt';
 import {BootMixin} from '@loopback/boot';
 import {ApplicationConfig} from '@loopback/core';
+import {RepositoryMixin} from '@loopback/repository';
+import {RestApplication} from '@loopback/rest';
 import {
   RestExplorerBindings,
   RestExplorerComponent,
 } from '@loopback/rest-explorer';
-import {RepositoryMixin} from '@loopback/repository';
-import {RestApplication} from '@loopback/rest';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {MongoDataSource} from './datasources';
 import {MySequence} from './sequence';
-
 export {ApplicationConfig};
 
 export class CvBackendApplication extends BootMixin(
@@ -17,6 +22,14 @@ export class CvBackendApplication extends BootMixin(
 ) {
   constructor(options: ApplicationConfig = {}) {
     super(options);
+
+    this.component(JWTAuthenticationComponent);
+
+    // Bind datasource
+    this.dataSource(MongoDataSource, UserServiceBindings.DATASOURCE_NAME);
+
+    // Mount authentication system
+    this.component(AuthenticationComponent);
 
     // Set up the custom sequence
     this.sequence(MySequence);
